@@ -1,7 +1,47 @@
 // Inject sidebar and toggle tab for the task manager
 (function() {
-    if (window.__taskManagerInjected) return;
+    // Prevent multiple injections
+    if (window.__taskManagerInjected) {
+        // If already injected, just toggle the existing sidebar
+        const existingSidebar = document.getElementById('task-manager-sidebar');
+        if (existingSidebar) {
+            existingSidebar.classList.toggle('open');
+        }
+        return;
+    }
+    
     window.__taskManagerInjected = true;
+
+    function initSidebar() {
+        // Create sidebar if it doesn't exist
+        let sidebar = document.getElementById('task-manager-sidebar');
+        if (!sidebar) {
+            sidebar = document.createElement('div');
+            sidebar.id = 'task-manager-sidebar';
+            
+            // Create sidebar content container
+            const sidebarContent = document.createElement('div');
+            sidebarContent.id = 'task-sidebar-content';
+            sidebar.appendChild(sidebarContent);
+            
+            document.body.appendChild(sidebar);
+        }
+
+        // Toggle sidebar
+        sidebar.classList.add('open');
+        renderTaskManagerSidebar();
+
+        // Add click handler for the folder icon
+        const folderIcon = document.querySelector('#task-manager-tab');
+        if (folderIcon) {
+            folderIcon.addEventListener('click', () => {
+                const sidebar = document.getElementById('task-manager-sidebar');
+                if (sidebar) {
+                    sidebar.classList.toggle('open');
+                }
+            });
+        }
+    }
 
     // Create style
     const style = document.createElement('link');
@@ -9,12 +49,6 @@
     style.type = 'text/css';
     style.href = chrome.runtime.getURL('content.css');
     document.head.appendChild(style);
-
-    // Sidebar container
-    const sidebar = document.createElement('div');
-    sidebar.id = 'task-manager-sidebar';
-    sidebar.innerHTML = '<div id="task-sidebar-content"></div>';
-    document.body.appendChild(sidebar);
 
     // Toggle tab/button
     const tab = document.createElement('div');
@@ -27,10 +61,12 @@
     let sidebarOpen = false;
     function openSidebar() {
         sidebar.classList.add('open');
+        sidebar.appendChild(tab);
         sidebarOpen = true;
     }
     function closeSidebar() {
         sidebar.classList.remove('open');
+        document.body.appendChild(tab);
         sidebarOpen = false;
     }
     tab.addEventListener('click', () => {
@@ -41,17 +77,6 @@
             renderTaskManagerSidebar();
         }
     });
-    // Move the tab inside the sidebar when open
-    function openSidebar() {
-        sidebar.classList.add('open');
-        sidebar.appendChild(tab);
-        sidebarOpen = true;
-    }
-    function closeSidebar() {
-        sidebar.classList.remove('open');
-        document.body.appendChild(tab);
-        sidebarOpen = false;
-    }
 
     // Render the task manager UI into the sidebar
     function renderTaskManagerSidebar() {
@@ -129,5 +154,12 @@
         } catch (err) {
             console.error('[TaskManager] Error in renderTaskManagerSidebar:', err);
         }
+    }
+
+    // Initialize when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initSidebar);
+    } else {
+        initSidebar();
     }
 })();

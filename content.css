@@ -11,7 +11,7 @@
   color: #2c3e50;
   border-left: 2px solid #4682b4;
   box-shadow: -4px 0 32px rgba(70, 130, 180, 0.14);
-  z-index: 2147483647;
+  z-index: 9999;  /* Add this line to keep sidebar below tab */
   transform: translateX(100%);
   transition: transform 0.28s cubic-bezier(0.32, 1.56, 0.6, 1);
   display: flex;
@@ -22,13 +22,14 @@
 
 #task-manager-sidebar.open {
   transform: translateX(0);
+  z-index: 9999;  /* Ensure this matches sidebar z-index */
 }
 
 #task-manager-tab {
   position: fixed;
   top: 24px;
   right: 24px;
-  z-index: 2147483648;
+  z-index: 10000;  /* Add this line to ensure it's above sidebar */
   background: #87ceeb;  /* Sky blue */
   border: 3px solid #4682b4;
   border-radius: 10px;
